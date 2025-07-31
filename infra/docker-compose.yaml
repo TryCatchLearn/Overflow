@@ -1,0 +1,192 @@
+services:
+  production-dashboard:
+    image: "mcr.microsoft.com/dotnet/nightly/aspire-dashboard:latest"
+    ports:
+      - "8080:18888"
+    expose:
+      - "18889"
+    networks:
+      - "aspire"
+    restart: "always"
+  keycloak:
+    image: "quay.io/keycloak/keycloak:26.2"
+    command:
+      - "start"
+      - "--import-realm"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: "admin"
+      KC_BOOTSTRAP_ADMIN_PASSWORD: "${KEYCLOAK_PASSWORD}"
+      KC_HEALTH_ENABLED: "true"
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      VIRTUAL_HOST: "id.overflow.local"
+      VIRTUAL_PORT: "8080"
+    ports:
+      - "6001:8080"
+    expose:
+      - "8080"
+      - "9000"
+    volumes:
+      - type: "volume"
+        target: "/opt/keycloak/data"
+        source: "keycloak-data"
+        read_only: false
+      - type: "bind"
+        target: "/opt/keycloak/data/import"
+        source: "/Users/neil/Projects/AspireCourse/demo/Overflow/infra/realms"
+        read_only: true
+    networks:
+      - "aspire"
+  postgres:
+    image: "docker.io/library/postgres:17.5"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    expose:
+      - "5432"
+    volumes:
+      - type: "volume"
+        target: "/var/lib/postgresql/data"
+        source: "postgres-data"
+        read_only: false
+    networks:
+      - "aspire"
+  typesense:
+    image: "typesense/typesense:29.0"
+    command:
+      - "--data-dir"
+      - "/data"
+      - "--api-key"
+      - "${TYPESENSE_API_KEY}"
+      - "--enable-cors"
+    environment:
+      TYPESENSE_API_KEY: "${TYPESENSE_API_KEY}"
+    expose:
+      - "8108"
+    volumes:
+      - type: "volume"
+        target: "/data"
+        source: "typesense-data"
+        read_only: false
+    networks:
+      - "aspire"
+  messaging:
+    image: "docker.io/library/rabbitmq:4.1-management"
+    environment:
+      RABBITMQ_DEFAULT_USER: "guest"
+      RABBITMQ_DEFAULT_PASS: "${MESSAGING_PASSWORD}"
+    expose:
+      - "5672"
+      - "15672"
+    volumes:
+      - type: "volume"
+        target: "/var/lib/rabbitmq"
+        source: "rabbitmq-data"
+        read_only: false
+    networks:
+      - "aspire"
+  question-svc:
+    image: "${QUESTION_SVC_IMAGE}"
+    environment:
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      HTTP_PORTS: "${QUESTION_SVC_PORT}"
+      services__keycloak__http__0: "http://keycloak:8080"
+      services__keycloak__management__0: "http://keycloak:9000"
+      services__keycloak__keycloak__0: "keycloak://keycloak:8080"
+      ConnectionStrings__questionDb: "Host=postgres;Port=5432;Username=postgres;Password=${POSTGRES_PASSWORD};Database=questionDb"
+      ConnectionStrings__messaging: "amqp://guest:${MESSAGING_PASSWORD}@messaging:5672"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://production-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "question-svc"
+    expose:
+      - "${QUESTION_SVC_PORT}"
+    depends_on:
+      keycloak:
+        condition: "service_started"
+      postgres:
+        condition: "service_started"
+      messaging:
+        condition: "service_started"
+    networks:
+      - "aspire"
+  search-svc:
+    image: "${SEARCH_SVC_IMAGE}"
+    environment:
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      HTTP_PORTS: "${SEARCH_SVC_PORT}"
+      typesense-api-key: "${TYPESENSE_API_KEY}"
+      services__typesense__typesense__0: "http://typesense:8108"
+      ConnectionStrings__messaging: "amqp://guest:${MESSAGING_PASSWORD}@messaging:5672"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://production-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "search-svc"
+    expose:
+      - "${SEARCH_SVC_PORT}"
+    depends_on:
+      typesense:
+        condition: "service_started"
+      messaging:
+        condition: "service_started"
+    networks:
+      - "aspire"
+  gateway:
+    image: "mcr.microsoft.com/dotnet/nightly/yarp:2.3.0-preview.4"
+    command:
+      - "/app/yarp.dll"
+    entrypoint:
+      - "dotnet"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Production"
+      services__question-svc__http__0: "http://question-svc:${QUESTION_SVC_PORT}"
+      REVERSEPROXY__ROUTES__route0__MATCH__PATH: "/questions/{**catch-all}"
+      REVERSEPROXY__ROUTES__route0__CLUSTERID: "cluster_question-svc"
+      REVERSEPROXY__ROUTES__route1__MATCH__PATH: "/tags/{**catch-all}"
+      REVERSEPROXY__ROUTES__route1__CLUSTERID: "cluster_question-svc"
+      REVERSEPROXY__ROUTES__route2__MATCH__PATH: "/search/{**catch-all}"
+      REVERSEPROXY__ROUTES__route2__CLUSTERID: "cluster_search-svc"
+      REVERSEPROXY__CLUSTERS__cluster_question-svc__DESTINATIONS__destination1__ADDRESS: "https+http://question-svc"
+      REVERSEPROXY__CLUSTERS__cluster_search-svc__DESTINATIONS__destination1__ADDRESS: "https+http://search-svc"
+      services__search-svc__http__0: "http://search-svc:${SEARCH_SVC_PORT}"
+      ASPNETCORE_URLS: "http://*:8001"
+      VIRTUAL_HOST: "api.overflow.local"
+      VIRTUAL_PORT: "8001"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://production-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "gateway"
+    ports:
+      - "8001:8001"
+    expose:
+      - "5000"
+    networks:
+      - "aspire"
+  nginx-proxy:
+    image: "nginxproxy/nginx-proxy:1.8"
+    ports:
+      - "80:80"
+    volumes:
+      - type: "bind"
+        target: "/tmp/docker.sock"
+        source: "/var/run/docker.sock"
+        read_only: true
+    networks:
+      - "aspire"
+networks:
+  aspire:
+    driver: "bridge"
+volumes:
+  keycloak-data:
+    driver: "local"
+  postgres-data:
+    driver: "local"
+  typesense-data:
+    driver: "local"
+  rabbitmq-data:
+    driver: "local"
