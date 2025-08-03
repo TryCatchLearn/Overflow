@@ -15,6 +15,14 @@ export function errorToast(error: {message: string, status?: number}) {
     })
 }
 
+export function successToast(message: string, title?: string) {
+    return addToast({
+        color: 'success',
+        title: title|| 'Success!',
+        description: message,
+    })
+}
+
 export function handleError(error: {message: string, status?: number}) {
     if (error.status === 500) {
         throw error
