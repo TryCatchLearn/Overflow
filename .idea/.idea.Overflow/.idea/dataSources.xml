@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="questionDb" uuid="0ab77a2e-8577-4530-b7b7-11d8d7d87273">
+    <data-source source="LOCAL" name="questionDb" uuid="d075498a-aed0-407a-acf4-d022ab6c0a94">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:5432/questionDb?password=6YV61VSHnUHW7V29rf9fwV&amp;user=postgres</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
-    <data-source source="LOCAL" name="questionDb" uuid="91229d19-3907-4016-aae1-d768833e7a77">
-      <driver-ref>postgresql</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:49493/questionDb?password=6YV61VSHnUHW7V29rf9fwV&amp;user=postgres</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:52272/questionDb?password=6YV61VSHnUHW7V29rf9fwV&amp;user=postgres</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

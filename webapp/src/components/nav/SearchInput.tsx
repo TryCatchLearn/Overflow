@@ -6,6 +6,7 @@ import {useEffect, useRef, useState} from "react";
 import {Question} from "@/lib/types";
 import {searchQuestions} from "@/lib/actions/question-actions";
 import {Listbox, ListboxItem} from "@heroui/listbox";
+import {Spinner} from "@heroui/spinner";
 
 export default function SearchInput() {
     const [query, setQuery] = useState('');
@@ -46,6 +47,7 @@ export default function SearchInput() {
                 placeholder='Search'
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                endContent={loading && <Spinner size='sm' />}
             />
             {showDropdown && results && (
                 <div 

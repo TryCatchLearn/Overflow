@@ -19,10 +19,9 @@ services:
       KC_HEALTH_ENABLED: "true"
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_STRICT: "false"
+      KC_PROXY_HEADERS: "xforwarded"
       VIRTUAL_HOST: "id.overflow.local"
       VIRTUAL_PORT: "8080"
-    ports:
-      - "6001:8080"
     expose:
       - "8080"
       - "9000"
@@ -97,7 +96,6 @@ services:
       HTTP_PORTS: "${QUESTION_SVC_PORT}"
       services__keycloak__http__0: "http://keycloak:8080"
       services__keycloak__management__0: "http://keycloak:9000"
-      services__keycloak__keycloak__0: "keycloak://keycloak:8080"
       ConnectionStrings__questionDb: "Host=postgres;Port=5432;Username=postgres;Password=${POSTGRES_PASSWORD};Database=questionDb"
       ConnectionStrings__messaging: "amqp://guest:${MESSAGING_PASSWORD}@messaging:5672"
       OTEL_EXPORTER_OTLP_ENDPOINT: "http://production-dashboard:18889"
@@ -148,10 +146,12 @@ services:
       services__question-svc__http__0: "http://question-svc:${QUESTION_SVC_PORT}"
       REVERSEPROXY__ROUTES__route0__MATCH__PATH: "/questions/{**catch-all}"
       REVERSEPROXY__ROUTES__route0__CLUSTERID: "cluster_question-svc"
-      REVERSEPROXY__ROUTES__route1__MATCH__PATH: "/tags/{**catch-all}"
+      REVERSEPROXY__ROUTES__route1__MATCH__PATH: "/test/{**catch-all}"
       REVERSEPROXY__ROUTES__route1__CLUSTERID: "cluster_question-svc"
-      REVERSEPROXY__ROUTES__route2__MATCH__PATH: "/search/{**catch-all}"
-      REVERSEPROXY__ROUTES__route2__CLUSTERID: "cluster_search-svc"
+      REVERSEPROXY__ROUTES__route2__MATCH__PATH: "/tags/{**catch-all}"
+      REVERSEPROXY__ROUTES__route2__CLUSTERID: "cluster_question-svc"
+      REVERSEPROXY__ROUTES__route3__MATCH__PATH: "/search/{**catch-all}"
+      REVERSEPROXY__ROUTES__route3__CLUSTERID: "cluster_search-svc"
       REVERSEPROXY__CLUSTERS__cluster_question-svc__DESTINATIONS__destination1__ADDRESS: "https+http://question-svc"
       REVERSEPROXY__CLUSTERS__cluster_search-svc__DESTINATIONS__destination1__ADDRESS: "https+http://search-svc"
       services__search-svc__http__0: "http://search-svc:${SEARCH_SVC_PORT}"
@@ -167,14 +167,35 @@ services:
       - "5000"
     networks:
       - "aspire"
+  webapp:
+    image: "${WEBAPP_IMAGE}"
+    environment:
+      NODE_ENV: "production"
+      services__keycloak__http__0: "http://keycloak:8080"
+      services__keycloak__management__0: "http://keycloak:9000"
+      PORT: "4000"
+      VIRTUAL_HOST: "app.overflow.local"
+      VIRTUAL_PORT: "4000"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://production-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "webapp"
+    expose:
+      - "4000"
+    networks:
+      - "aspire"
   nginx-proxy:
     image: "nginxproxy/nginx-proxy:1.8"
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - type: "bind"
         target: "/tmp/docker.sock"
         source: "/var/run/docker.sock"
+        read_only: true
+      - type: "bind"
+        target: "/etc/nginx/certs"
+        source: "/Users/neil/Projects/AspireCourse/demo/Overflow/infra/devcerts"
         read_only: true
     networks:
       - "aspire"

@@ -12,6 +12,7 @@
     "@heroicons/react": "^2.2.0",
     "@heroui/react": "^2.8.2",
     "@hookform/resolvers": "^5.2.1",
+    "@next/env": "^15.4.5",
     "@tiptap/extension-image": "^3.0.9",
     "@tiptap/pm": "^3.0.9",
     "@tiptap/react": "^3.0.9",
