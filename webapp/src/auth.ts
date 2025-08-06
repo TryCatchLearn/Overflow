@@ -8,8 +8,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         }
     })],
     callbacks: {
-        async jwt({token, account}) {
-            const now = Math.floor(Date.now() / 1000)
+        async jwt({token, account, profile}) {
+            const now = Math.floor(Date.now() / 1000);
+            
+            if (profile && profile.sub) {
+                token.sub = profile.sub
+            }
             
             if (account && account.access_token && account.refresh_token) {
                 token.accessToken = account.access_token
@@ -54,6 +58,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return token;
         },
         async session({session, token}) {
+            if (token.sub) {
+                session.user.id = token.sub
+            }
+            
             if (token.accessToken) {
                 session.accessToken = token.accessToken;
             }

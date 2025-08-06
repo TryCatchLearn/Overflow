@@ -1,3 +1,5 @@
+'use client';
+
 import {Answer} from "@/lib/types";
 import {Avatar} from "@heroui/avatar";
 import {timeAgo} from "@/lib/util";
