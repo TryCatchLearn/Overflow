@@ -1,6 +1,6 @@
 import NextAuth from "next-auth"
 import Keycloak from "next-auth/providers/keycloak"
-import {authConfig} from "@/lib/config";
+import {apiConfig, authConfig} from "@/lib/config";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
     providers: [Keycloak({
@@ -12,14 +12,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         userinfo: `${authConfig.kcInternal}/protocol/openid-connect/userinfo`,
     })],
     callbacks: {
-        async jwt({token, account, profile}) {
+        async jwt({token, account}) {
             const now = Math.floor(Date.now() / 1000);
             
-            if (profile && profile.sub) {
-                token.sub = profile.sub
-            }
-            
             if (account && account.access_token && account.refresh_token) {
+                const res = await fetch(apiConfig.baseUrl + '/profiles/me', {
+                    headers: {
+                        Authorization: `Bearer ${account.access_token}`,
+                    }
+                })
+                
+                if (res.ok) {
+                    token.user = await res.json()
+                } else {
+                    console.error('Failed to fetch user profile: ', await res.text())
+                }
+                
                 token.accessToken = account.access_token
                 token.refreshToken = account.refresh_token;
                 token.accessTokenExpires = now + account.expires_in!;
@@ -62,8 +70,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             return token;
         },
         async session({session, token}) {
-            if (token.sub) {
-                session.user.id = token.sub
+            if (token.user) {
+                session.user = token.user
             }
             
             if (token.accessToken) {
