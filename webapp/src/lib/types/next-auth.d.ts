@@ -9,9 +9,15 @@ declare module 'next-auth' {
         user: {
             id: string;
             displayName: string
-            reputation: string
-        } & DefaultUser['user']
+            reputation: number
+        } & DefaultUser
         accessToken: string;
+    }
+    
+    interface User {
+        id: string;
+        displayName: string;
+        reputation: number;
     }
 }
 
