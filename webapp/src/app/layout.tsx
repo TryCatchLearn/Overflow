@@ -3,6 +3,8 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 import TopNav from "@/components/nav/TopNav";
 import SideMenu from "@/components/SideMenu";
+import TrendingTags from "@/components/TrendingTags";
+import TopUsers from "@/components/TopUsers";
 
 export const metadata: Metadata = {
   title: "Overflow",
@@ -27,7 +29,11 @@ export default function RootLayout({
                   {children}
               </main>
               <aside className='basis-1/4 shrink-0 px-6 pt-20 bg-stone-300 dark:bg-default-100 sticky top-0'>
-                  Right content
+                 <div className='flex flex-col gap-6'>
+                     <TrendingTags />
+                     <TopUsers />
+                 </div>
+                
               </aside>
           </div>
       </Providers>

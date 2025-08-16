@@ -12,6 +12,7 @@ export type Question = {
     votes: number
     answerCount: number
     answers: Answer[]
+    userVoted: number
 }
 
 export type Answer = {
@@ -23,6 +24,8 @@ export type Answer = {
     updatedAt?: string
     accepted: boolean
     questionId: string
+    votes: number
+    userVoted: number
 }
 
 export type Tag = {
@@ -30,6 +33,12 @@ export type Tag = {
     name: string
     slug: string
     description: string
+    usageCount: number
+}
+
+export type TrendingTag = {
+    tag: string
+    count: number
 }
 
 export type Profile = {
@@ -43,3 +52,24 @@ export type FetchResponse<T> = {
     data: T | null
     error?: {message: string, status: number}
 }
+
+export type VoteRecord = {
+    targetId: string
+    targetType: 'Question' | 'Answer'
+    voteValue: number
+}
+
+export type Vote = {
+    targetId: string
+    targetType: 'Question' | 'Answer'
+    targetUserId: string
+    questionId: string
+    voteValue: 1 | -1
+}
+
+export type TopUser = {
+    userId: string
+    delta: number
+}
+
+export type TopUserWithProfile = TopUser & {profile: Profile}

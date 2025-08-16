@@ -53,6 +53,9 @@ namespace QuestionService.Data.Migrations
                         .HasMaxLength(36)
                         .HasColumnType("character varying(36)");
 
+                    b.Property<int>("Votes")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("QuestionId");
@@ -129,6 +132,9 @@ namespace QuestionService.Data.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<int>("UsageCount")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.ToTable("Tags");
@@ -139,70 +145,80 @@ namespace QuestionService.Data.Migrations
                             Id = "aspire",
                             Description = "A composable, opinionated stack for building distributed apps with .NET. Provides dashboard, diagnostics, and simplified service orchestration.",
                             Name = "Aspire",
-                            Slug = "aspire"
+                            Slug = "aspire",
+                            UsageCount = 0
                         },
                         new
                         {
                             Id = "keycloak",
                             Description = "An open-source identity and access management solution for modern applications and services. Integrates easily with OAuth2, OIDC, and SSO.",
                             Name = "Keycloak",
-                            Slug = "keycloak"
+                            Slug = "keycloak",
+                            UsageCount = 0
                         },
                         new
                         {
                             Id = "dotnet",
                             Description = "A modern, cross-platform development platform for building cloud, web, mobile, desktop, and IoT apps using C# and F#.",
                             Name = ".NET",
-                            Slug = "dotnet"
+                            Slug = "dotnet",
+                            UsageCount = 0
                         },
                         new
                         {
                             Id = "ef-core",
                             Description = "A modern object-database mapper (ORM) for .NET that supports LINQ, change tracking, and migrations for working with relational databases.",
                             Name = "Entity Framework Core",
-                            Slug = "ef-core"
+                            Slug = "ef-core",
+                            UsageCount = 0
                         },
                         new
                         {
                             Id = "wolverine",
                             Description = "A high-performance messaging and command-handling framework for .NET with built-in support for Mediator, queues, retries, and durable messaging.",
                             Name = "Wolverine",
-                            Slug = "wolverine"
+                            Slug = "wolverine",
+                            UsageCount = 0
                         },
                         new
                         {
                             Id = "postgresql",
                             Description = "A powerful, open-source object-relational database system known for reliability, feature richness, and standards compliance.",
                             Name = "PostgreSQL",
-                            Slug = "postgresql"
+                            Slug = "postgresql",
+                            UsageCount = 0
                         },
                         new
                         {
                             Id = "signalr",
                             Description = "A real-time communication library for ASP.NET that enables server-to-client messaging over WebSockets, long polling, and more.",
                             Name = "SignalR",
-                            Slug = "signalr"
+                            Slug = "signalr",
+                            UsageCount = 0
                         },
                         new
                         {
                             Id = "nextjs",
                             Description = "A React framework for building fast, full-stack web apps with server-side rendering, routing, and static site generation.",
                             Name = "Next.js",
-                            Slug = "nextjs"
+                            Slug = "nextjs",
+                            UsageCount = 0
                         },
                         new
                         {
                             Id = "typescript",
                             Description = "A statically typed superset of JavaScript that compiles to clean JavaScript. Helps build large-scale apps with tooling support.",
                             Name = "TypeScript",
-                            Slug = "typescript"
+                            Slug = "typescript",
+                            UsageCount = 0
                         },
                         new
                         {
                             Id = "microservices",
                             Description = "An architectural style that structures an application as a collection of loosely coupled services that can be independently deployed and scaled.",
                             Name = "Microservices",
-                            Slug = "microservices"
+                            Slug = "microservices",
+                            UsageCount = 0
                         });
                 });
 
