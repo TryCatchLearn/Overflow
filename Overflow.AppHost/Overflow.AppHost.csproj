@@ -24,6 +24,8 @@
       <ProjectReference Include="..\ProfileService\ProfileService.csproj" />
       <ProjectReference Include="..\QuestionService\QuestionService.csproj" />
       <ProjectReference Include="..\SearchService\SearchService.csproj" />
+      <ProjectReference Include="..\StatsService\StatsService.csproj" />
+      <ProjectReference Include="..\VoteService\VoteService.csproj" />
     </ItemGroup>
 
 </Project>

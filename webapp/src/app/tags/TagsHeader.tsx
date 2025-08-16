@@ -3,8 +3,10 @@
 import {MagnifyingGlassIcon} from '@heroicons/react/24/solid'
 import {Input} from "@heroui/input";
 import {Tab, Tabs} from "@heroui/tabs";
+import {useRouter} from "next/navigation";
 
 export default function TagHeader() {
+    const router = useRouter();
     const tabs = [
         {key: 'popular', label: 'Popular'},
         {key: 'name', label: 'Name'}
@@ -27,7 +29,10 @@ export default function TagHeader() {
                     startContent={<MagnifyingGlassIcon className='h-6 text-neutral-500'/>}
                 />
 
-                <Tabs>
+                <Tabs
+                    onSelectionChange={(key) => router.push(`/tags?sort=${key}`)}
+                    defaultSelectedKey='name'
+                >
                     {tabs.map((item) => (
                         <Tab key={item.key} title={item.label}/>
                     ))}
