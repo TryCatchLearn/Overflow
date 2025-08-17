@@ -1,32 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="statDb" uuid="1c6a6050-8c85-497b-bb38-e0a1ad8400a2">
+    <data-source source="LOCAL" name="postgres" uuid="7d235177-7d3a-4de9-92f9-e5c6a6374db6">
       <driver-ref>postgresql</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:49483/statDb?password=6YV61VSHnUHW7V29rf9fwV&amp;user=postgres</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
-    <data-source source="LOCAL" name="voteDb" uuid="964e1bf4-b4eb-4d0a-8ea5-8bd96a01e484">
-      <driver-ref>postgresql</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:49483/voteDb?password=6YV61VSHnUHW7V29rf9fwV&amp;user=postgres</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
-    <data-source source="LOCAL" name="profileDb" uuid="8b200d1c-f856-4d0a-a46e-01f092868b13">
-      <driver-ref>postgresql</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:49483/profileDb?password=6YV61VSHnUHW7V29rf9fwV&amp;user=postgres</jdbc-url>
-      <working-dir>$ProjectFileDir$</working-dir>
-    </data-source>
-    <data-source source="LOCAL" name="questionDb" uuid="b1c3285a-3ebf-4d72-b421-8ef90865dba3">
-      <driver-ref>postgresql</driver-ref>
-      <synchronize>true</synchronize>
-      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
-      <jdbc-url>jdbc:postgresql://localhost:49483/questionDb?password=6YV61VSHnUHW7V29rf9fwV&amp;user=postgres</jdbc-url>
+      <jdbc-url>jdbc:postgresql://localhost:56728/?password=6YV61VSHnUHW7V29rf9fwV&amp;user=postgres</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
   </component>

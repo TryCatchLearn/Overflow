@@ -1,3 +1,17 @@
+export type PaginatedResult<T> = {
+    items: T[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+}
+
+export type QuestionParams = {
+    tag?: string;
+    page?: number;
+    pageSize?: number;
+    sort?: string;
+}
+
 export type Question = {
     id: string
     title: string

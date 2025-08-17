@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <PackageReference Include="Aspire.Keycloak.Authentication" Version="9.4.0-preview.1.25378.8" />
+      <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.4.1" />
       <PackageReference Include="Polly" Version="8.6.2" />
       <PackageReference Include="WolverineFx.RabbitMQ" Version="4.8.0" />
     </ItemGroup>
