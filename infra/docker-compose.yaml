@@ -32,7 +32,7 @@ services:
         read_only: false
       - type: "bind"
         target: "/opt/keycloak/data/import"
-        source: "/Users/neil/Projects/AspireCourse/demo/Overflow/infra/realms"
+        source: "/Users/neilc/Projects/AspireCourse/demo/Overflow/infra/realms"
         read_only: true
     networks:
       - "aspire"
@@ -135,6 +135,80 @@ services:
         condition: "service_started"
     networks:
       - "aspire"
+  profile-svc:
+    image: "${PROFILE_SVC_IMAGE}"
+    environment:
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      HTTP_PORTS: "${PROFILE_SVC_PORT}"
+      services__keycloak__http__0: "http://keycloak:8080"
+      services__keycloak__management__0: "http://keycloak:9000"
+      ConnectionStrings__profileDb: "Host=postgres;Port=5432;Username=postgres;Password=${POSTGRES_PASSWORD};Database=profileDb"
+      ConnectionStrings__messaging: "amqp://guest:${MESSAGING_PASSWORD}@messaging:5672"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://production-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "profile-svc"
+    expose:
+      - "${PROFILE_SVC_PORT}"
+    depends_on:
+      keycloak:
+        condition: "service_started"
+      postgres:
+        condition: "service_started"
+      messaging:
+        condition: "service_started"
+    networks:
+      - "aspire"
+  stat-svc:
+    image: "${STAT_SVC_IMAGE}"
+    environment:
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      HTTP_PORTS: "${STAT_SVC_PORT}"
+      ConnectionStrings__statDb: "Host=postgres;Port=5432;Username=postgres;Password=${POSTGRES_PASSWORD};Database=statDb"
+      ConnectionStrings__messaging: "amqp://guest:${MESSAGING_PASSWORD}@messaging:5672"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://production-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "stat-svc"
+    expose:
+      - "${STAT_SVC_PORT}"
+    depends_on:
+      postgres:
+        condition: "service_started"
+      messaging:
+        condition: "service_started"
+    networks:
+      - "aspire"
+  vote-svc:
+    image: "${VOTE_SVC_IMAGE}"
+    environment:
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EXCEPTION_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_EMIT_EVENT_LOG_ATTRIBUTES: "true"
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      HTTP_PORTS: "${VOTE_SVC_PORT}"
+      services__keycloak__http__0: "http://keycloak:8080"
+      services__keycloak__management__0: "http://keycloak:9000"
+      ConnectionStrings__voteDb: "Host=postgres;Port=5432;Username=postgres;Password=${POSTGRES_PASSWORD};Database=voteDb"
+      ConnectionStrings__messaging: "amqp://guest:${MESSAGING_PASSWORD}@messaging:5672"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://production-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "vote-svc"
+    expose:
+      - "${VOTE_SVC_PORT}"
+    depends_on:
+      keycloak:
+        condition: "service_started"
+      postgres:
+        condition: "service_started"
+      messaging:
+        condition: "service_started"
+    networks:
+      - "aspire"
   gateway:
     image: "mcr.microsoft.com/dotnet/nightly/yarp:2.3.0-preview.4"
     command:
@@ -152,9 +226,21 @@ services:
       REVERSEPROXY__ROUTES__route2__CLUSTERID: "cluster_question-svc"
       REVERSEPROXY__ROUTES__route3__MATCH__PATH: "/search/{**catch-all}"
       REVERSEPROXY__ROUTES__route3__CLUSTERID: "cluster_search-svc"
+      REVERSEPROXY__ROUTES__route4__MATCH__PATH: "/profiles/{**catch-all}"
+      REVERSEPROXY__ROUTES__route4__CLUSTERID: "cluster_profile-svc"
+      REVERSEPROXY__ROUTES__route5__MATCH__PATH: "/stats/{**catch-all}"
+      REVERSEPROXY__ROUTES__route5__CLUSTERID: "cluster_stat-svc"
+      REVERSEPROXY__ROUTES__route6__MATCH__PATH: "/votes/{**catch-all}"
+      REVERSEPROXY__ROUTES__route6__CLUSTERID: "cluster_vote-svc"
       REVERSEPROXY__CLUSTERS__cluster_question-svc__DESTINATIONS__destination1__ADDRESS: "https+http://question-svc"
       REVERSEPROXY__CLUSTERS__cluster_search-svc__DESTINATIONS__destination1__ADDRESS: "https+http://search-svc"
+      REVERSEPROXY__CLUSTERS__cluster_profile-svc__DESTINATIONS__destination1__ADDRESS: "https+http://profile-svc"
+      REVERSEPROXY__CLUSTERS__cluster_stat-svc__DESTINATIONS__destination1__ADDRESS: "https+http://stat-svc"
+      REVERSEPROXY__CLUSTERS__cluster_vote-svc__DESTINATIONS__destination1__ADDRESS: "https+http://vote-svc"
       services__search-svc__http__0: "http://search-svc:${SEARCH_SVC_PORT}"
+      services__profile-svc__http__0: "http://profile-svc:${PROFILE_SVC_PORT}"
+      services__stat-svc__http__0: "http://stat-svc:${STAT_SVC_PORT}"
+      services__vote-svc__http__0: "http://vote-svc:${VOTE_SVC_PORT}"
       ASPNETCORE_URLS: "http://*:8001"
       VIRTUAL_HOST: "api.overflow.local"
       VIRTUAL_PORT: "8001"
@@ -195,7 +281,7 @@ services:
         read_only: true
       - type: "bind"
         target: "/etc/nginx/certs"
-        source: "/Users/neil/Projects/AspireCourse/demo/Overflow/infra/devcerts"
+        source: "/Users/neilc/Projects/AspireCourse/demo/Overflow/infra/devcerts"
         read_only: true
     networks:
       - "aspire"

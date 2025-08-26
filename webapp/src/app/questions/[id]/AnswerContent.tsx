@@ -14,7 +14,7 @@ export default async function AnswerContent({answer, askerId}: Props) {
         <div className='flex border-b pb-3 px-6'>
             <VotingButtons 
                 target={answer}
-                currentUserId={currentUser.id}
+                currentUserId={currentUser?.id}
                 askerId={askerId}
             />
             <div className='flex flex-col w-full'>

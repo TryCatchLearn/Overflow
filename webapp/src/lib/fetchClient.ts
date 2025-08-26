@@ -31,8 +31,9 @@ export async function fetchClient<T>(
     const parsed = isJson ? await response.json() : await response.text();
     
     if (!response.ok) {
+        console.log(response);
         if (response.status === 404) return notFound();
-        if (response.status === 500) throw new Error('Server error. Please try again later');
+        // if (response.status === 500) throw new Error('Server error. Please try again later');
         
         let message = '';
         

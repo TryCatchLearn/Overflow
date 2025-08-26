@@ -40,7 +40,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             }
             
             try {
-                const response = await fetch(`${authConfig.kcIssuer}/protocol/openid-connect/token`, {
+                const response = await fetch(`${authConfig.kcInternal}/protocol/openid-connect/token`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                     body: new URLSearchParams({
