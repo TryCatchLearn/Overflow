@@ -1,0 +1,98 @@
+name: Aspire Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  OUTPUT_DIR: infra
+  IMAGE_PREFIX: trycatchlearn/overflow
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET and Aspire CLI
+        run: |
+          # Install .NET 9.0.302
+          curl -sSL https://dot.net/v1/dotnet-install.sh | bash -s -- --version 9.0.303 --install-dir "$HOME/.dotnet"
+          echo "$HOME/.dotnet" >> $GITHUB_PATH
+          export PATH="$HOME/.dotnet:$PATH"
+          
+          # Install Aspire CLI
+          curl -sSL https://aspire.dev/install.sh | bash
+
+      - name: Create webapp/.env.production from GitHub Secrets
+        run: |
+          cat <<EOF > webapp/.env.production
+          API_URL=${{ secrets.API_URL }}
+          AUTH_KEYCLOAK_ID=${{ secrets.AUTH_KEYCLOAK_ID }}
+          AUTH_KEYCLOAK_SECRET=${{ secrets.AUTH_KEYCLOAK_SECRET }}
+          AUTH_KEYCLOAK_ISSUER=${{ secrets.AUTH_KEYCLOAK_ISSUER }}
+          AUTH_KEYCLOAK_ISSUER_INTERNAL=${{ secrets.AUTH_KEYCLOAK_ISSUER_INTERNAL }}
+          AUTH_URL=${{ secrets.AUTH_URL }}
+          AUTH_URL_INTERNAL=${{ secrets.AUTH_URL_INTERNAL }}
+          AUTH_SECRET=${{ secrets.AUTH_SECRET }}
+          NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=${{ secrets.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME }}
+          NEXT_PUBLIC_CLOUDINARY_API_KEY=${{ secrets.NEXT_PUBLIC_CLOUDINARY_API_KEY }}
+          CLOUDINARY_API_SECRET=${{ secrets.CLOUDINARY_API_SECRET }}
+          EOF
+
+      - name: Publish Aspire app
+        run: |
+          mkdir -p infra
+          aspire publish -o ${{ env.OUTPUT_DIR }}
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
+
+      - name: Tag and push images to Docker Hub
+        run: |
+          TAG="latest"
+          PREFIX="${{ env.IMAGE_PREFIX}}"
+          SERVICES=(
+            question-svc
+            profile-svc
+            vote-svc
+            search-svc
+            stat-svc
+            webapp
+          )
+
+          for svc in "${SERVICES[@]}"; do
+            LOCAL_IMAGE="${svc}:latest"
+            REMOTE_IMAGE="${PREFIX}-${svc}:${TAG}"
+
+            echo "📦 Tagging $LOCAL_IMAGE → $REMOTE_IMAGE"
+            docker tag "$LOCAL_IMAGE" "$REMOTE_IMAGE"
+
+            echo "🚀 Pushing $REMOTE_IMAGE"
+            docker push "$REMOTE_IMAGE"
+          done
+
+      - name: Upload docker-compose.yml to server
+        uses: appleboy/scp-action@v1
+        with:
+          timeout: 120s
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_PRIVATE_KEY }}
+          source: "${{ env.OUTPUT_DIR }}/docker-compose.yaml"
+          target: "~/overflow"
+
+      - name: SSH and deploy via Docker Compose
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_PRIVATE_KEY }}
+          script: |
+            cd ~/overflow
+            docker compose pull
+            docker compose up -d --remove-orphans
