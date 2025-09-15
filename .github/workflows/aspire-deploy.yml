@@ -93,6 +93,6 @@ jobs:
           username: ${{ secrets.DROPLET_USER }}
           key: ${{ secrets.DROPLET_SSH_PRIVATE_KEY }}
           script: |
-            cd ~/overflow
+            cd ~/overflow/infra
             docker compose pull
             docker compose up -d --remove-orphans
