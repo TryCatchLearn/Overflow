@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Aspire.Azure.Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.4.0" />
         <PackageReference Include="HtmlSanitizer" Version="9.0.886" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7">

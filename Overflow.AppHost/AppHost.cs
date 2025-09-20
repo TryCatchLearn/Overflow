@@ -2,22 +2,20 @@ using Microsoft.Extensions.Hosting;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var compose = builder.AddDockerComposeEnvironment("production")
-    .WithDashboard(dashboard => dashboard.WithHostPort(8080));
+var kcPort = builder.ExecutionContext.IsPublishMode ? 80 : 6001;
 
-var keycloak = builder.AddKeycloak("keycloak", 6001)
+var keycloak = builder.AddKeycloak("keycloak", kcPort)
+    .WithEndpoint("http", e => e.IsExternal = true)
     .WithDataVolume("keycloak-data")
     .WithEnvironment("KC_HTTP_ENABLED", "true")
     .WithEnvironment("KC_HOSTNAME_STRICT", "false")
-    .WithEnvironment("KC_PROXY_HEADERS", "xforwarded")
-    .WithEnvironment("VIRTUAL_HOST", "overflow-id.trycatchlearn.com")
-    .WithEnvironment("VIRTUAL_PORT", "8080")
-    .WithEnvironment("LETSENCRYPT_HOST", "overflow-id.trycatchlearn.com")
-    .WithEnvironment("LETSENCRYPT_EMAIL", "trycatchlearn@outlook.com");
+    .WithEnvironment("KC_PROXY_HEADERS", "xforwarded");
 
-var postgres = builder.AddPostgres("postgres", port: 5432)
-    .WithDataVolume("postgres-data")
-    .WithPgWeb();
+var pgUser = builder.AddParameter("pg-username", secret: true);
+var pgPassword = builder.AddParameter("pg-password", secret: true);
+
+var postgres = builder.AddAzurePostgresFlexibleServer("postgres")
+    .WithPasswordAuthentication(pgUser, pgPassword);
 
 // var typesenseApiKey = builder.AddParameter("typesense-api-key", secret: true);
 
@@ -40,7 +38,6 @@ var statDb = postgres.AddDatabase("statDb");
 var voteDb = postgres.AddDatabase("voteDb");
 
 var rabbitmq = builder.AddRabbitMQ("messaging")
-    .WithDataVolume("rabbitmq-data")
     .WithManagementPlugin(port: 15672);
 
 var questionService = builder.AddProject<Projects.QuestionService>("question-svc")
@@ -92,40 +89,24 @@ var yarp = builder.AddYarp("gateway")
         yarpBuilder.AddRoute("/votes/{**catch-all}", voteService);
     })
     .WithEnvironment("ASPNETCORE_URLS", "http://*:8001")
-    .WithEndpoint(port: 8001, targetPort: 8001, scheme: "http", name: "gateway", isExternal: true)
-    .WithEnvironment("VIRTUAL_HOST", "overflow-api.trycatchlearn.com")
-    .WithEnvironment("VIRTUAL_PORT", "8001")
-    .WithEnvironment("LETSENCRYPT_HOST", "overflow-api.trycatchlearn.com")
-    .WithEnvironment("LETSENCRYPT_EMAIL", "trycatchlearn@outlook.com");
+    .WithEndpoint(port: 8001, targetPort: 8001, scheme: "http", name: "gateway", isExternal: true);
 
 var webapp = builder.AddNpmApp("webapp", "../webapp", "dev")
     .WithReference(keycloak)
-    .WithHttpEndpoint(env: "PORT", port: 3000, targetPort: 4000)
-    .WithEnvironment("VIRTUAL_HOST", "overflow.trycatchlearn.com")
-    .WithEnvironment("VIRTUAL_PORT", "4000")
-    .WithEnvironment("LETSENCRYPT_HOST", "overflow.trycatchlearn.com")
-    .WithEnvironment("LETSENCRYPT_EMAIL", "trycatchlearn@outlook.com")
+    .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
 
-if (!builder.Environment.IsDevelopment())
+if (builder.ExecutionContext.IsPublishMode)
 {
-    builder.AddContainer("nginx-proxy", "nginxproxy/nginx-proxy", "1.8")
-        .WithEndpoint(80, 80, "nginx", isExternal: true)
-        .WithEndpoint(443, 443, "nginx-ssl", isExternal: true)
-        .WithBindMount("/var/run/docker.sock", "/tmp/docker.sock", true)
-        .WithVolume("certs", "/etc/nginx/certs", false)
-        .WithVolume("html", "/usr/share/nginx/html", false)
-        .WithVolume("vhost", "/etc/nginx/vhost.d")
-        .WithContainerName("nginx-proxy");
-    
-    builder.AddContainer("nginx-proxy-acme", "nginxproxy/acme-companion", "2.2")
-        .WithEnvironment("DEFAULT_EMAIL", "trycatchlearn@outlook.com")
-        .WithEnvironment("NGINX_PROXY_CONTAINER", "nginx-proxy")
-        .WithBindMount("/var/run/docker.sock", "/var/run/docker.sock", isReadOnly: true)
-        .WithVolume("certs", "/etc/nginx/certs")
-        .WithVolume("html", "/usr/share/nginx/html")
-        .WithVolume("vhost", "/etc/nginx/vhost.d", false)
-        .WithVolume("acme", "/etc/acme.sh");
+    rabbitmq.WithVolume("rabbitmq-data", "var/lib/rabbitmq/mnesia");
+    webapp.WithEndpoint(env: "PORT", port: 80, targetPort: 4000, scheme: "http", isExternal: true);
+}
+else
+{
+    postgres.RunAsContainer();
+    rabbitmq.WithDataVolume("rabbitmq-data");
+    webapp.WithHttpEndpoint(env: "PORT", port: 3000, targetPort: 4000);
+    keycloak.WithRealmImport("../infra/realms");
 }
 
 builder.Build().Run();

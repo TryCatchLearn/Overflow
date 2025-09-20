@@ -22,6 +22,7 @@ public static class AuthExtensions
                         "http://id.overflow.local/realms/overflow",
                         "https://id.overflow.local/realms/overflow",
                         "https://overflow-id.trycatchlearn.com/realms/overflow",
+                        "https://keycloak.whitedune-b8cd0e0b.southeastasia.azurecontainerapps.io/realms/overflow",
                     ],
                     ClockSkew = TimeSpan.Zero,
                 };

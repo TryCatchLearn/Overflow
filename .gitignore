@@ -8,3 +8,4 @@ riderModule.iml
 /infra/devcerts/overflow.local.key
 /infra/devcerts/overflow.local.crt
 /infra/do/*
+.azure

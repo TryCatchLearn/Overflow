@@ -15,7 +15,7 @@ await builder.UseWolverineWithRabbitMqAsync(opts =>
 {
     opts.ApplicationAssembly = typeof(Program).Assembly;
 });
-builder.AddNpgsqlDbContext<ProfileDbContext>("profileDb");
+builder.AddAzureNpgsqlDbContext<ProfileDbContext>("profileDb");
 
 var app = builder.Build();
 
