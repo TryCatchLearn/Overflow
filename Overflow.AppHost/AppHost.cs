@@ -3,6 +3,7 @@ using Microsoft.Extensions.Hosting;
 var builder = DistributedApplication.CreateBuilder(args);
 
 var compose = builder.AddDockerComposeEnvironment("production")
+    .WithSshDeploySupport()
     .WithDashboard(dashboard => dashboard.WithHostPort(8080));
 
 var keycloak = builder.AddKeycloak("keycloak", 6001)
@@ -10,8 +11,10 @@ var keycloak = builder.AddKeycloak("keycloak", 6001)
     .WithRealmImport("../infra/realms")
     .WithEnvironment("KC_HTTP_ENABLED", "true")
     .WithEnvironment("KC_HOSTNAME_STRICT", "false")
-    .WithEnvironment("VIRTUAL_HOST", "id.overflow.local")
-    .WithEnvironment("VIRTUAL_PORT", "8080");
+    .WithEnvironment("VIRTUAL_HOST", "overflow-id.trycatchlearn.com")
+    .WithEnvironment("VIRTUAL_PORT", "8080")
+    .WithEnvironment("LETSENCRYPT_HOST", "overflow-id.trycatchlearn.com")
+    .WithEnvironment("LETSENCRYPT_EMAIL", "trycatchlearn@outlook.com");
 
 var postgres = builder.AddPostgres("postgres", port: 5432)
     .WithDataVolume("postgres-data")
@@ -87,25 +90,42 @@ var yarp = builder.AddYarp("gateway")
     })
     .WithEnvironment("ASPNETCORE_URLS", "http://*:8001")
     .WithEndpoint(port: 8001, scheme: "http", targetPort: 8001, name: "gateway", isExternal: true)
-    .WithEnvironment("VIRTUAL_HOST", "api.overflow.local")
-    .WithEnvironment("VIRTUAL_PORT", "8001");
+    .WithEnvironment("VIRTUAL_HOST", "overflow-api.trycatchlearn.com")
+    .WithEnvironment("VIRTUAL_PORT", "8001")
+    .WithEnvironment("LETSENCRYPT_HOST", "overflow-api.trycatchlearn.com")
+    .WithEnvironment("LETSENCRYPT_EMAIL", "trycatchlearn@outlook.com");
 
 var webapp = builder.AddJavaScriptApp("webapp", "../webapp")
     .WithReference(keycloak)
     .WithHttpEndpoint(env: "PORT", port: 3000, targetPort: 4000)
-    .WithEnvironment("VIRTUAL_HOST", "app.overflow.local")
+    .WithEnvironment("VIRTUAL_HOST", "overflow.trycatchlearn.com")
     .WithEnvironment("VIRTUAL_PORT", "4000")
+    .WithEnvironment("LETSENCRYPT_HOST", "overflow.trycatchlearn.com")
+    .WithEnvironment("LETSENCRYPT_EMAIL", "trycatchlearn@outlook.com")
     .PublishAsDockerFile();
 
 if (!builder.Environment.IsDevelopment())
 {
-    builder.AddContainer("nginx-proxy", "nginxproxy/nginx-proxy", "1.9")
-        .WithEndpoint(80, 80, name: "nginx", isExternal: true)
-        .WithEndpoint(443, 443, name: "nginx-ssl", isExternal: true)
+    builder.AddContainer("nginx-proxy", "nginxproxy/nginx-proxy", "1.8")
+        .WithEndpoint(80, 80, "nginx", isExternal: true)
+        .WithEndpoint(443, 443, "nginx-ssl", isExternal: true)
         .WithBindMount("/var/run/docker.sock", "/tmp/docker.sock", true)
-        .WithBindMount("../infra/devcerts", "/etc/nginx/certs", true);
+        .WithVolume("certs", "/etc/nginx/certs", false)
+        .WithVolume("html", "/usr/share/nginx/html", false)
+        .WithVolume("vhost", "/etc/nginx/vhost.d")
+        .WithContainerName("nginx-proxy");
+    
+    builder.AddContainer("nginx-proxy-acme", "nginxproxy/acme-companion", "2.2")
+        .WithEnvironment("DEFAULT_EMAIL", "your-email@address.com")
+        .WithEnvironment("NGINX_PROXY_CONTAINER", "nginx-proxy")
+        .WithBindMount("/var/run/docker.sock", "/var/run/docker.sock", isReadOnly: true)
+        .WithVolume("certs", "/etc/nginx/certs")
+        .WithVolume("html", "/usr/share/nginx/html")
+        .WithVolume("vhost", "/etc/nginx/vhost.d", false)
+        .WithVolume("acme", "/etc/acme.sh");
 
-    keycloak.WithEnvironment("KC_HOSTNAME", "https://id.overflow.local")
+    keycloak.WithEnvironment("KC_HOSTNAME", "https://overflow-id.trycatchlearn.com")
         .WithEnvironment("KC_HOSTNAME_BACKCHANNEL_DYNAMIC", "true");
 }
+
 builder.Build().Run();

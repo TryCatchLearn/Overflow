@@ -11,19 +11,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d3aae074-179f-49a1-aa59-213c9fd29622" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/StatsService/Extensions/PostgresDbExtensions.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Common/Common.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/Common/Common.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Overflow.sln.DotSettings.user" beforeDir="false" afterPath="$PROJECT_DIR$/Overflow.sln.DotSettings.user" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/QuestionService/Controllers/QuestionsController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/QuestionService/Controllers/QuestionsController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/QuestionService/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/QuestionService/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/QuestionService/QuestionService.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/QuestionService/QuestionService.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/StatsService/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/StatsService/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/infra/docker-compose.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/infra/docker-compose.yaml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/src/components/TopUsers.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/TopUsers.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/src/components/TrendingTags.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/components/TrendingTags.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/src/lib/actions/tag-actions.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/lib/actions/tag-actions.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/src/lib/fetchClient.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/lib/fetchClient.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/webapp/src/middleware.ts" beforeDir="false" afterPath="$PROJECT_DIR$/webapp/src/proxy.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -269,7 +257,8 @@
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="End of section 12" />
     <MESSAGE value="End of section 13" />
-    <option name="LAST_COMMIT_MESSAGE" value="End of section 13" />
+    <MESSAGE value="complete azure dep" />
+    <option name="LAST_COMMIT_MESSAGE" value="complete azure dep" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

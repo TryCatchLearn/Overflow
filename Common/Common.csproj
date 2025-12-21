@@ -7,14 +7,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.Keycloak.Authentication" Version="13.0.1-preview.1.25575.3"/>
-        <PackageReference Include="Polly" Version="8.6.5"/>
+        <PackageReference Include="Aspire.Keycloak.Authentication" Version="13.1.0-preview.1.25616.3" />
+        <PackageReference Include="Polly" Version="8.6.5" />
         <PackageReference Include="WolverineFx.RabbitMQ" Version="5.9.1" />
         <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.1.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Overflow.ServiceDefaults\Overflow.ServiceDefaults.csproj"/>
+        <ProjectReference Include="..\Overflow.ServiceDefaults\Overflow.ServiceDefaults.csproj" />
     </ItemGroup>
 
 </Project>

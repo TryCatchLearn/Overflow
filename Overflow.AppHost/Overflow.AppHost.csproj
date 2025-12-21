@@ -1,4 +1,4 @@
-<Project Sdk="Aspire.AppHost.Sdk/13.0.0">
+<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
@@ -9,12 +9,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Aspire.Hosting.Docker" Version="13.0.1-preview.1.25575.3" />
-      <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.0.2" />
-      <PackageReference Include="Aspire.Hosting.Keycloak" Version="13.0.0-preview.1.25560.3" />
-      <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.0.0" />
-      <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.0.0" />
-      <PackageReference Include="Aspire.Hosting.Yarp" Version="13.0.1" />
+      <PackageReference Include="Aspire.Hosting.Docker" Version="13.1.0-preview.1.25616.3" />
+      <PackageReference Include="Aspire.Hosting.Docker.SshDeploy" Version="0.1.0-ci.139" />
+      <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.1.0" />
+      <PackageReference Include="Aspire.Hosting.Keycloak" Version="13.1.0-preview.1.25616.3" />
+      <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.1.0" />
+      <PackageReference Include="Aspire.Hosting.RabbitMQ" Version="13.1.0" />
+      <PackageReference Include="Aspire.Hosting.Yarp" Version="13.1.0" />
     </ItemGroup>
 
     <ItemGroup>

@@ -7,3 +7,5 @@ riderModule.iml
 /infra/realms/overflow-realm.json
 /infra/.env.Production
 /infra/devcerts/*
+/infra/do/*
+/Overflow.AppHost/aspire-output/*
