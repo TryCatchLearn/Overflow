@@ -88,8 +88,7 @@ var yarp = builder.AddYarp("gateway")
         yarpBuilder.AddRoute("/stats/{**catch-all}", statService);
         yarpBuilder.AddRoute("/votes/{**catch-all}", voteService);
     })
-    .WithEnvironment("ASPNETCORE_URLS", "http://*:8001")
-    .WithEndpoint(port: 8001, scheme: "http", targetPort: 8001, name: "gateway", isExternal: true)
+    .WithHostPort(8001)
     .WithEnvironment("VIRTUAL_HOST", "overflow-api.trycatchlearn.com")
     .WithEnvironment("VIRTUAL_PORT", "8001")
     .WithEnvironment("LETSENCRYPT_HOST", "overflow-api.trycatchlearn.com")

@@ -20,6 +20,8 @@ cd Overflow
 3. Ensure you have Docker Desktop installed on your machine.  If not download and install from Docker and review their installation instructions for your Operating system [here](https://docs.docker.com/desktop/).
 4. Execute the following commands to install the packages for the .Net and NextJS app (you will need the .Net SDK and NodeJS installed to use these commands). We also need to set a password for the typesense service in the dotnet user-secrets
 ```
+# This repo relies on a package not available in nuget yet so add a feed that allows us to use sshdeploy in the app (from here: https://github.com/davidfowl/aspire-ssh-deploy)
+dotnet nuget add source https://f.feedz.io/davidfowl/aspire/nuget/index.json --name davidfowl-aspire
 dotnet restore
 cd Overflow.AppHost
 dotnet user-secrets set "Parameters:typesense-api-key" "abc"
